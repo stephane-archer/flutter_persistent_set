@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:persistent_set/persistent_string_set.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:persistent_string_set/persistent_string_set.dart';
 
 void main() {
   const testKey = 'test_set';
@@ -55,6 +54,21 @@ void main() {
     // Try to remove a non-existent element
     expect(await set.remove('c'), isFalse);
     expect(set.length, 1);
+  });
+
+  test('removeWhere works correctly', () async {
+    final set = await PersistentStringSet.create(testKey);
+    await set.add('a');
+    await set.add('b');
+    await set.add('c');
+
+    // Remove elements that match the condition
+    await set.removeWhere((s) => s == 'a' || s == 'c');
+    expect(set.length, 1);
+    expect(set.contains('a'), isFalse);
+    expect(set.contains('c'), isFalse);
+    expect(set.contains('b'), isTrue);
+    expect(set.toSet(), {'b'});
   });
 
   test('clear removes all elements', () async {

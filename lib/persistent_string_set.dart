@@ -1,51 +1,27 @@
+import 'package:persistent_set/persistent_set.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PersistentStringSet {
-  final String _key;
-  final Set<String> _setInMemory;
-  final SharedPreferences _prefs;
+// @Deprecated('Use PersistentSet.create<String>(key) instead')
+// Deprecate after resolving TOD0 in persistent_set.dart;
+// this class will remain for backward compatibility and easy of use for strings.
+class PersistentStringSet extends PersistentSet<String> {
+  PersistentStringSet._(String key, Set<String> mem, SharedPreferences prefs)
+    : super.internal(key, mem, prefs, (s) => s, (s) => s);
 
-  PersistentStringSet._(this._key, this._setInMemory, this._prefs);
-
-  int get length => _setInMemory.length;
-
-  Future<bool> add(String value) async {
-    final bool added = _setInMemory.add(value);
-    if (added) {
-      await _prefs.setStringList(_key, _setInMemory.toList());
+  /// Create or load a persistent set of strings at `key`.
+  /// If the key does not exist and `seedIfEmpty` is provided, it will be used to
+  /// initialize the set and persist it immediately.
+  static Future<PersistentStringSet> create(
+    String key, {
+    Set<String>? seedIfEmpty,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(key);
+    final mem = (list != null) ? list.toSet() : <String>{};
+    final set = PersistentStringSet._(key, mem, prefs);
+    if (mem.isEmpty && seedIfEmpty != null) {
+      await set.addAll(seedIfEmpty);
     }
-    return added;
-  }
-
-  Future<void> clear() async {
-    _setInMemory.clear();
-    await _prefs.remove(_key);
-  }
-
-  bool contains(Object? element) {
-    return _setInMemory.contains(element);
-  }
-
-  String? lookup(Object? element) {
-    return _setInMemory.lookup(element);
-  }
-
-  Future<bool> remove(Object? value) async {
-    final bool removed = _setInMemory.remove(value);
-    if (removed) {
-      await _prefs.setStringList(_key, _setInMemory.toList());
-    }
-    return removed;
-  }
-
-  Set<String> toSet() {
-    return _setInMemory.toSet();
-  }
-
-  static Future<PersistentStringSet> create(String key) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String>? items = prefs.getStringList(key);
-    final setInMemory = items?.toSet() ?? <String>{};
-    return PersistentStringSet._(key, setInMemory, prefs);
+    return set;
   }
 }

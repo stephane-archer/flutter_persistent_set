@@ -1,7 +1,7 @@
-name: persistent_string_set
-description: "A simple Dart package that provides a Set<String> like interface which is persisted on the device."
-version: 0.0.1
-repository: "https://github.com/stephane-archer/flutter_persistent_string_set"
+name: persistent_set
+description: "A simple Dart package that provides a Set<T>-like interface which is persisted on the device."
+version: 0.1.0
+repository: https://github.com/stephane-archer/flutter_persistent_set
 
 environment:
   sdk: ^3.9.2
@@ -21,7 +21,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
-flutter:
+# flutter:
 
   # To add assets to your package, add an assets section, like this:
   # assets:
