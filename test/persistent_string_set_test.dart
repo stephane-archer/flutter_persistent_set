@@ -1,12 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:persistent_set/persistent_string_set.dart';
+import 'package:persistent_set/persistent_set.dart';
+import 'package:persistent_set/persistent_set_storage.dart';
+import 'package:persistent_set/src/persistent_set_storage.dart'
+    show SharedPreferencesPersistentSetStorage;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'test_preferences.dart';
 
 void main() {
   const testKey = 'test_set';
 
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    setMockInitialPreferences({});
   });
 
   tearDown(() async {
@@ -18,6 +23,128 @@ void main() {
     final set = await PersistentStringSet.create(testKey);
     expect(set.length, 0);
     expect(set.toSet(), <String>{});
+  });
+
+  test('create supports the standard SharedPreferences test mock', () async {
+    SharedPreferences.setMockInitialValues({
+      testKey: <String>['mocked'],
+    });
+    final preferences = await SharedPreferences.getInstance();
+
+    final set = await PersistentStringSet.create(
+      testKey,
+      preferences: preferences,
+    );
+
+    expect(set.toSet(), {'mocked'});
+    await set.add('written');
+    expect(preferences.getStringList(testKey), ['mocked', 'written']);
+  });
+
+  test('create accepts an injected storage backend', () async {
+    final preferences = await SharedPreferences.getInstance();
+    final PersistentSetStorage storage = SharedPreferencesPersistentSetStorage(
+      preferences,
+    );
+
+    final set = await PersistentStringSet.create(testKey, storage: storage);
+    await set.add('stored');
+
+    expect(preferences.getStringList(testKey), ['stored']);
+  });
+
+  test('rejects custom storage with legacy preferences', () async {
+    final preferences = await SharedPreferences.getInstance();
+    final storage = SharedPreferencesPersistentSetStorage(preferences);
+
+    expect(
+      () => PersistentStringSet.create(
+        testKey,
+        storage: storage,
+        preferences: preferences,
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test('create seeds when its storage key does not exist', () async {
+    final set = await PersistentStringSet.create(
+      testKey,
+      seedIfMissing: {'default'},
+    );
+
+    expect(set.toSet(), {'default'});
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getStringList(testKey), ['default']);
+  });
+
+  test('create does not seed an existing empty stored set', () async {
+    setMockInitialPreferences({testKey: <String>[]});
+
+    final set = await PersistentStringSet.create(
+      testKey,
+      seedIfMissing: {'default'},
+    );
+
+    expect(set.toSet(), isEmpty);
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getStringList(testKey), isEmpty);
+  });
+
+  test('create persists an empty seed for a missing storage key', () async {
+    final set = await PersistentStringSet.create(
+      testKey,
+      seedIfMissing: <String>{},
+    );
+
+    expect(set.toSet(), isEmpty);
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.containsKey(testKey), isTrue);
+    expect(preferences.getStringList(testKey), isEmpty);
+
+    final recreated = await PersistentStringSet.create(
+      testKey,
+      seedIfMissing: {'default'},
+    );
+    expect(recreated.toSet(), isEmpty);
+  });
+
+  test('deprecated seedIfEmpty retains existing-empty behavior', () async {
+    setMockInitialPreferences({testKey: <String>[]});
+
+    final set = await PersistentStringSet.create(
+      testKey,
+      // ignore: deprecated_member_use_from_same_package
+      seedIfEmpty: {'legacy-default'},
+    );
+
+    expect(set.toSet(), {'legacy-default'});
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getStringList(testKey), ['legacy-default']);
+  });
+
+  test('deprecated empty seed does not create a missing key', () async {
+    final set = await PersistentStringSet.create(
+      testKey,
+      // ignore: deprecated_member_use_from_same_package
+      seedIfEmpty: <String>{},
+    );
+
+    expect(set.toSet(), isEmpty);
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.containsKey(testKey), isFalse);
+  });
+
+  test('rejects both seed parameter names', () async {
+    expect(
+      () => PersistentStringSet.create(
+        testKey,
+        seedIfMissing: {'new'},
+        // ignore: deprecated_member_use_from_same_package
+        seedIfEmpty: {'legacy'},
+      ),
+      throwsArgumentError,
+    );
   });
 
   test('add, contains, length, and toSet work correctly', () async {

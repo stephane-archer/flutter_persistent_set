@@ -1,21 +1,24 @@
 name: persistent_set
-description: "A simple Dart package that provides a Set<T>-like interface which is persisted on the device."
-version: 0.1.0
+description: "A persistent Set-like collection for Flutter."
+version: 1.0.0
 repository: https://github.com/stephane-archer/flutter_persistent_set
 
 environment:
-  sdk: ^3.9.2
-  flutter: ">=1.17.0"
+  sdk: ^3.7.0
+  flutter: ">=3.29.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  meta: ^1.16.0
   shared_preferences: ^2.5.3
+  shared_preferences_android: ^2.4.12
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  shared_preferences_platform_interface: ^2.4.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
