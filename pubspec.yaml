@@ -1,11 +1,19 @@
 name: persistent_set
 description: "A persistent Set-like collection for Flutter."
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/stephane-archer/flutter_persistent_set
 
 environment:
   sdk: ^3.7.0
   flutter: ">=3.29.0"
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
 
 dependencies:
   flutter:

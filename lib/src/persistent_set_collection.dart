@@ -198,7 +198,7 @@ class PersistentSet<T> {
         return removals.isNotEmpty;
       },
       mutation: (final draft) => draft.removeAll(removals),
-    ).then<void>((final _) {});
+    ).then<void>((_) {});
   }
 
   /// Remove all elements from the set and remove its storage key.

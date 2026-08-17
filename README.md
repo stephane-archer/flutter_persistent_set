@@ -21,7 +21,7 @@ Add the package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  persistent_set: ^1.0.0
+  persistent_set: ^1.0.1
 ```
 
 ## Usage

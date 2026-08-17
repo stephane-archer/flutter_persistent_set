@@ -67,9 +67,9 @@ final class StorageOperationQueue {
     }
 
     _operationCount += 1;
-    final result = _tail.then((final _) => _run(operation));
+    final result = _tail.then((_) => _run(operation));
     _tail = result.then<void>(
-      (final _) {},
+      (_) {},
       onError: (final Object _, final StackTrace _) {},
     );
     return result.whenComplete(() => _operationCount -= 1);

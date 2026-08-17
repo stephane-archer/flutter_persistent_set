@@ -20,7 +20,7 @@ void main() {
   tearDown(cleanPreferences);
 
   testWidgets('0.1 values remain available through the async adapter', (
-    final _,
+    _,
   ) async {
     final legacyPreferences = await SharedPreferences.getInstance();
     await legacyPreferences.setStringList(key, ['legacy']);

@@ -1,3 +1,11 @@
+## 1.0.1
+
+* Declare Android, iOS, Linux, macOS, web, and Windows support explicitly so
+  pub.dev does not classify the package as Android-only because of its
+  Android-specific legacy-storage compatibility dependency.
+* Use web-compatible wildcard callback parameters in the package and migration
+  test.
+
 ## 1.0.0
 
 ### Breaking changes
